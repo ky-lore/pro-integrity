@@ -59,7 +59,12 @@
     <div>
       <span class="kicker">Get a Quote</span>
       <h2 style="font-size:clamp(1.6rem,3vw,2.2rem);margin:.3rem 0 1.1rem">Request Your Free Estimate</h2>
-      <form onsubmit="event.preventDefault(); this.reset(); document.getElementById('sent').style.display='block';">
+      <form id="quoteForm" action="https://formsubmit.co/ajax/prointegrityplumbing@gmail.com" method="POST">
+        <!-- FormSubmit config (no account/creds needed) -->
+        <input type="hidden" name="_subject" value="New quote request — Pro Integrity Plumbing website">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="text" name="_honey" style="display:none">
         <div class="form-grid">
           <div class="field"><label for="fn">Name</label><input id="fn" name="name" required placeholder="Your name"></div>
           <div class="field"><label for="ph">Phone</label><input id="ph" name="phone" type="tel" required placeholder="(760) 000-0000"></div>
@@ -83,9 +88,34 @@
         </div>
         <div class="field"><label for="msg">How can we help?</label><textarea id="msg" name="message" placeholder="Tell us about the job..."></textarea></div>
         <label class="consent"><input type="checkbox" required> By checking this box you agree to receive text messages from Pro Integrity Plumbing. Message &amp; data rates may apply.</label>
-        <button type="submit" class="btn btn-red">Send Request →</button>
+        <button type="submit" id="quoteBtn" class="btn btn-red">Send Request →</button>
         <p id="sent" style="display:none;color:var(--blue);font-weight:600;margin-top:.9rem">✔ Thanks! We'll be in touch shortly. For urgent help, call (760) 553-4883.</p>
+        <p id="sendErr" style="display:none;color:var(--red);font-weight:600;margin-top:.9rem">Something went wrong sending your request. Please call us at (760) 553-4883.</p>
       </form>
+      <script>
+        document.getElementById('quoteForm').addEventListener('submit', async function(e){
+          e.preventDefault();
+          var btn = document.getElementById('quoteBtn');
+          var ok = document.getElementById('sent');
+          var err = document.getElementById('sendErr');
+          ok.style.display = 'none'; err.style.display = 'none';
+          btn.disabled = true; btn.textContent = 'Sending…';
+          try{
+            var res = await fetch(this.action, {
+              method: 'POST',
+              headers: { 'Accept': 'application/json' },
+              body: new FormData(this)
+            });
+            if(!res.ok) throw new Error('bad status');
+            this.reset();
+            ok.style.display = 'block';
+          }catch(_){
+            err.style.display = 'block';
+          }finally{
+            btn.disabled = false; btn.textContent = 'Send Request →';
+          }
+        });
+      </script>
     </div>
 
     <!-- Contact info + map -->
